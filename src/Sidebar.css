@@ -52,5 +52,7 @@
 }
 
 .sidebar__chats {
-    background-color: blue;
+    flex: 1; /*make all column full - using flex direction column*/
+    background-color: white;
+    overflow: scroll;
 }

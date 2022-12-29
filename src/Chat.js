@@ -15,46 +15,39 @@ import { useStateValue } from "./StateProvider";
 
 function Chat() {
     const [input, setInput] = useState("");
-    const [seed, setSeed] = useState ("");
-    const { roomId } = useParams();
+    const [seed, setSeed] = useState("");
+    const {roomId} = useParams();
     const [roomName, setRoomName] = useState("");
     const [messages, setMessages] = useState([]);
-    const [{ user }, dispatch] = useStateValue();
+    const [{user}, dispatch] = useStateValue();
 
-    useEffect (() => {
-      if(roomId) {
-        db.collection('rooms')
-        .doc(roomId)
-        .onSnapshot(snapshot => (
-          setRoomName(snapshot.data().name)
-        ));
+    useEffect(()=>{
+      if(roomId){
+          db.collection('rooms').doc(roomId).onSnapshot(snapshot => {
+              setRoomName(snapshot.data().name);
+          });
 
-        db.collection('rooms').doc(roomId)
-        .collection('messages')
-        .orderBy('timestamp', 'asc')   /* asc= ascending order = from oldest to newest message column wise. */
-        .onSnapshot(snapshot => (
-          setMessages(snapshot.docs.map(doc => doc.data()))
-        ));
+          db.collection('rooms').doc(roomId).collection("messages").orderBy("timestamp","asc").onSnapshot(snapshot => {
+              setMessages(snapshot.docs.map(doc => doc.data()))
+          });
+
       }
-    }, [roomId]);
+  },[roomId])
 
+      useEffect(() => {
+          setSeed(Math.floor(Math.random() * 5000));        
+      }, [roomId]);
 
-    useEffect(() => {
-      setSeed(Math.floor(Math.random() * 5000 ));
-    }, []);
+      const sendMessage = (e) => {
+          e.preventDefault();
+          db.collection('rooms').doc(roomId).collection('messages').add({
+              message: input,
+              name: user.displayName,
+              timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          })
 
-    const sendMessage = (e) => {
-        e.preventDefault();
-        console.log("You typed >>>" , input);
-
-        db.collection('rooms').doc(roomId).collection('messages').add({
-          message: input,
-          name: user.displayName, /*user displayName comming from google authentication */
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(), /* to show real time depend on area you live. */
-        });
-
-        setInput(""); /* clear input after press enter */
-    };
+          setInput("");
+  }
 
   return (
     <div className="chat">
@@ -98,11 +91,13 @@ function Chat() {
             <InsertEmoticonIcon />
             <form>
                 <input 
-                value = {input}
-                onChange = {(e) => setInput(e.target.value)}
-                placeholder="Type a message" 
-                type="text" /> 
-                <button onClick={sendMessage} type="submit">Send a message</button>
+                    value={input} 
+                    onChange={(e) => setInput(e.target.value)} 
+                    type="text"
+                    placeholder="Type a message"/>
+                <button 
+                    type="submit" 
+                    onClick={sendMessage}> Send a Message</button>
             </form>
             <MicIcon />
         </div>

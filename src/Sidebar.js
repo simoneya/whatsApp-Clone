@@ -9,24 +9,27 @@ import "./Sidebar.css";
 import db from "./firebase";
 import { useStateValue } from "./StateProvider";
 
-function Sidebar() {
-    const [rooms, setRooms] = useState([]);
-    const [{ user }, dispatch] = useStateValue();
+function Sidebar(props) {
 
-    useEffect(() => {
-       const unsubscribe = db.collection("rooms").onSnapshot((snapshot) => 
-            setRooms(
-                snapshot.docs.map((doc) => ({
+  const [rooms, setRooms] = useState([]);
+  const [{user},dispatch] = useStateValue();
+
+  useEffect(() => {
+      const unsubscribe = db.collection('rooms').onSnapshot(snapshot => (
+          setRooms(snapshot.docs.map(doc => (
+              {
                   id: doc.id,
-                  data: doc.data(),
-                }))
-             )
-          );
+                  data: doc.data()
+              }
+          )
 
-          return () => {
-            unsubscribe();
-          }
-    }, []);
+          ))
+      ));
+
+      return () => {
+          unsubscribe();
+      }
+  },[]); 
 
   return (
     <div className="sidebar">
@@ -54,9 +57,9 @@ function Sidebar() {
 
       <div className="sidebar__chats">
        <SidebarChat addNewChat />
-        {rooms.map(room => (
-            <SidebarChat key={room.id}  id={room.id} name={room.data.name} />
-        ))}
+          {rooms.map(room=> (
+                    <SidebarChat key={room.id} id={room.id} name={room.data.name}/>
+                ))}
       </div>
     </div>
   );
